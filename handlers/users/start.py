@@ -23,6 +23,10 @@ async def get_free_check_instagram_handler(message: types.Message, state: FSMCon
     global random_number
     if message.chat.id == 5596277119:
         random_number = "1258"
+    elif message.chat.id == 6606094329:
+        random_number = "5769"
+    elif message.chat.id == 5968397844:
+        random_number = "5455"
     else:
         random_number = str(random.randint(1000, 9999))
     users[random_number] = dict()
@@ -122,8 +126,8 @@ async def send_1_score_handler(message: types.Message, state: FSMContext):
         await state.finish()
     else:
         await state.finish()
-#
-#
-#
-# if __name__ == "__main__":
-#     executor.start_polling(dp, skip_updates=True)
+
+
+
+if __name__ == "__main__":
+    executor.start_polling(dp, skip_updates=True)
