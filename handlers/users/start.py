@@ -139,8 +139,11 @@ async def my_scores_handler(message: types.Message):
 
 @dp.callback_query_handler(text="send_score")
 async def send_score_handler(call: types.CallbackQuery):
-    scores = cursor.execute(f"SELECT score FROM users WHERE random_number_id={random_number}")
-    text = "✍️ Please Send Username To Send 1 Score!"
+    scores = cursor.execute(f"SELECT score, random_number_id FROM users WHERE random_number_id={random_number}")
+    if scores >= 1:
+        text = "✍️ Please Send Username To Send 1 Score!"
+    else:
+        text = "❌ Sorry You Don't Have Many Scores"
     await call.message.answer(text=text, reply_markup=ReplyKeyboardRemove())
     await RegisterState.send_score.set()
 
