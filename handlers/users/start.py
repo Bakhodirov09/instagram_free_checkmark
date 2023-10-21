@@ -133,13 +133,14 @@ INSERT INTO users (random_number_id, chat_id, phone_number, full_name, score) VA
 
 @dp.message_handler(text="⭐ My Scores")
 async def my_scores_handler(message: types.Message):
-    scores = users[random_number]["score"]
-    text = f"Your Have: {scores} scores"
+    scores = cursor.execute(f"SELECT score FROM users WHERE random_number_id={random_number}")
+    text = f"You Have: {scores} scores"
     await message.answer(text=text)
 
 @dp.callback_query_handler(text="send_score")
 async def send_score_handler(call: types.CallbackQuery):
-    if users[random_number]["score"] >= 1:
+    scores = cursor.execute(f"SELECT score FROM users WHERE random_number_id={random_number}")
+    if scores >= 1:
         text = "✍️ Please Send Username To Send 1 Score!"
         await call.message.answer(text=text, reply_markup=ReplyKeyboardRemove())
     else:
