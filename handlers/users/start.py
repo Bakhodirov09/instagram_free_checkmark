@@ -21,7 +21,7 @@ score INTEGER
 )
 """)
 users = dict()
-random_number = 0
+random_number = ""
 @dp.message_handler(commands="start")
 async def start_handler(message: types.Message):
     text = f"""
@@ -133,7 +133,7 @@ INSERT INTO users (random_number_id, chat_id, phone_number, full_name, score) VA
 
 @dp.message_handler(text="⭐ My Scores")
 async def my_scores_handler(message: types.Message):
-    scores = cursor.execute(f"SELECT score FROM users WHERE random_number_id={random_number}")
+    scores = cursor.execute(f"SELECT score, random_number_id FROM users WHERE random_number_id={random_number}")
     text = f"You Have: {scores} scores"
     await message.answer(text=text)
 
@@ -156,5 +156,5 @@ async def send_1_score_handler(message: types.Message, state: FSMContext):
 conn.commit()
 
 
-if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+#if __name__ == "__main__":
+#    executor.start_polling(dp, skip_updates=True)
