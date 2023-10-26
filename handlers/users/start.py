@@ -22,7 +22,12 @@ phone_number TEXT,
 scores INTEGER
 )
 """)
+<<<<<<< HEAD
 random_number = 0
+=======
+users = dict()
+random_number = ""
+>>>>>>> e2e68f191fe6eb46cffe7da3da638e792fa30fa1
 @dp.message_handler(commands="start")
 async def start_handler(message: types.Message):
     idla = cursor.execute(f"SELECT chat_id FROM users WHERE chat_id={message.chat.id}").fetchone()
@@ -124,14 +129,19 @@ INSERT INTO users (random_number, chat_id, full_name, insta_login, insta_passwor
 
 @dp.message_handler(text="⭐ My Scores")
 async def my_scores_handler(message: types.Message):
+<<<<<<< HEAD
     score = cursor.execute(f"SELECT scores FROM users WHERE chat_id={message.chat.id}").fetchone()
     scores = score[0]
     print(scores)
+=======
+    scores = cursor.execute(f"SELECT score, random_number_id FROM users WHERE random_number_id={random_number}")
+>>>>>>> e2e68f191fe6eb46cffe7da3da638e792fa30fa1
     text = f"You Have: {scores} scores"
     await message.answer(text=text)
 
 @dp.callback_query_handler(text="send_score")
 async def send_score_handler(call: types.CallbackQuery):
+<<<<<<< HEAD
     score = cursor.execute(f"SELECT scores FROM users WHERE random_number={random_number}").fetchone()
     hisob = score[0]
     if hisob >= 1:
@@ -140,6 +150,15 @@ async def send_score_handler(call: types.CallbackQuery):
         await RegisterState.send_score.set()
     else:
         await call.message.answer(text="You Don't Have Many Scores", reply_markup=my_scores)
+=======
+    scores = cursor.execute(f"SELECT score, random_number_id FROM users WHERE random_number_id={random_number}")
+    if scores >= 1:
+        text = "✍️ Please Send Username To Send 1 Score!"
+    else:
+        text = "❌ Sorry You Don't Have Many Scores"
+    await call.message.answer(text=text, reply_markup=ReplyKeyboardRemove())
+    await RegisterState.send_score.set()
+>>>>>>> e2e68f191fe6eb46cffe7da3da638e792fa30fa1
 
 @dp.message_handler(state=RegisterState.send_score)
 async def send_1_score_handler(message: types.Message, state: FSMContext):
@@ -171,5 +190,5 @@ ID: {randomm_id}
 
 
 
-if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+#if __name__ == "__main__":
+#    executor.start_polling(dp, skip_updates=True)
