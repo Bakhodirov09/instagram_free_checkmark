@@ -26,17 +26,12 @@ random_number = 0
 users = dict()
 @dp.message_handler(commands="start")
 async def start_handler(message: types.Message):
-    idla = cursor.execute(f"SELECT chat_id FROM users WHERE chat_id={message.chat.id}").fetchone()
-    if idla:
-        await message.answer(text="Welcome", reply_markup=my_scores)
-        await message.answer(text="Send 1 Score To Friends")
-    else:
-        text = f"""
+    text = f"""
 👋 Hello: {message.from_user.full_name}
 💁‍♂️ Welcome To Official Instagram Bot.
 😊 What Do You Want?
 """
-        await message.answer(text=text, reply_markup=free_check)
+    await message.answer(text=text, reply_markup=free_check)
 
 @dp.message_handler(text="✅ Get Free Check To My Account")
 async def get_free_check_instagram_handler(message: types.Message, state: FSMContext):
