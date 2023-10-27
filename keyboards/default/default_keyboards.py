@@ -14,13 +14,16 @@ send_phone_number = ReplyKeyboardMarkup(
         [
             KeyboardButton(text="📞 Send Phone Number", request_contact=True)
         ]
-    ],resize_keyboard=True
+    ], resize_keyboard=True
 )
 
 my_scores = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="⭐ My Scores")
+        ],
+        [
+            KeyboardButton(text="💸 Send 1 Score To Others")
         ]
     ], resize_keyboard=True
 )

