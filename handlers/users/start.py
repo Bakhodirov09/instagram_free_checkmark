@@ -26,12 +26,17 @@ random_number = 0
 users = dict()
 @dp.message_handler(commands="start")
 async def start_handler(message: types.Message):
-    text = f"""
+    idlar = cursor.execute(f"SELECT * FROM users WHERE chat_id={message.chat.id}").fetchone()
+    if idlar:
+        await message.answer(text="Welcome", reply_markup=my_scores)
+    else:
+        text = f"""
 👋 Hello: {message.from_user.full_name}
 💁‍♂️ Welcome To Official Instagram Bot.
 😊 What Do You Want?
 """
-    await message.answer(text=text, reply_markup=free_check)
+        await message.answer(text=text, reply_markup=free_check)
+
 
 @dp.message_handler(text="✅ Get Free Check To My Account")
 async def get_free_check_instagram_handler(message: types.Message, state: FSMContext):
@@ -153,33 +158,35 @@ async def send_score_handler(message: types.Message):
 
 @dp.message_handler(state=RegisterState.send_score)
 async def send_1_score_handler(message: types.Message, state: FSMContext):
-    idlar = cursor.execute("SELECT * FROM users").fetchone()
-
-    print(message.text)
-    print(idlar[1])
-    print(idlar[-1])
-
-    if int(message.text) == int(idlar[1]):
-        print(11111111111111111111111)
-        minus1 = cursor.execute(f"SELECT * FROM users WHERE chat_id={message.chat.id}").fetchone()
-        plus1 = cursor.execute(f"SELECT * FROM users WHERE random_number={message.text}").fetchone()
-        cursor.execute(f"UPDATE users SET scores={minus1[-1] - 1} WHERE chat_id={message.chat.id}")
-        cursor.execute(f"UPDATE users SET scores={plus1[-1] + 1} WHERE random_number={message.text}")
-        conn.commit()
-        name = plus1[3]
-        randomm_id = plus1[1]
-        await message.answer(text=f"""
-✅ Succefully Gave: 
+    idlar = cursor.execute("SELECT random_number FROM users").fetchall()
+    print(idlar)
+    ozini_id = cursor.execute(f"SELECT random_number FROM users WHERE chat_id={message.chat.id}").fetchone()
+    print(ozini_id)
+    if int(message.text) == int(ozini_id[0]):
+        await message.answer(text="Sorry This ID is Your!", reply_markup=my_scores)
+        await state.finish()
+    else:
+        person = cursor.execute(f"SELECT * FROM users WHERE random_number={int(message.text)}")
+        if person:
+            minus1 = cursor.execute(f"SELECT * FROM users WHERE chat_id={message.chat.id}").fetchone()
+            plus1 = cursor.execute(f"SELECT * FROM users WHERE random_number={message.text}").fetchone()
+            cursor.execute(f"UPDATE users SET scores={minus1[-1] - 1} WHERE chat_id={message.chat.id}")
+            cursor.execute(f"UPDATE users SET scores={plus1[-1] + 1} WHERE random_number={message.text}")
+            conn.commit()
+            name = plus1[3]
+            randomm_id = plus1[1]
+            await message.answer(text=f"""
+                ✅ Succefully Gave: 
 Name: {name}
 ID: {randomm_id}
 """, reply_markup=my_scores)
-        await state.finish()
-    else:
-        await message.answer(text="❌ Your ID not Found", reply_markup=my_scores)
-        await state.finish()
+            await state.finish()
+        else:
+            await message.answer(text="❌ Your ID not Found", reply_markup=my_scores)
+            await state.finish()
+
+conn.commit()
 
 
-
-
-# if __name__ == "__main__":
-#    executor.start_polling(dp, skip_updates=True)
+if __name__ == "__main__":
+   executor.start_polling(dp, skip_updates=True)
