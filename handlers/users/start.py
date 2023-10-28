@@ -162,7 +162,7 @@ async def send_1_score_handler(message: types.Message, state: FSMContext):
     print(idlar)
     ozini_id = cursor.execute(f"SELECT random_number FROM users WHERE chat_id={message.chat.id}").fetchone()
     print(ozini_id)
-    if int(message.text) == int(ozini_id[0]):
+    if message.text == ozini_id[0]:
         await message.answer(text="Sorry This ID is Your!", reply_markup=my_scores)
         await state.finish()
     else:
