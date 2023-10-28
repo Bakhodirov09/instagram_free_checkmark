@@ -170,8 +170,8 @@ async def send_1_score_handler(message: types.Message, state: FSMContext):
         if person:
             minus1 = cursor.execute(f"SELECT * FROM users WHERE chat_id={message.chat.id}").fetchone()
             plus1 = cursor.execute(f"SELECT * FROM users WHERE random_number={message.text}").fetchone()
-            cursor.execute(f"UPDATE users SET scores={minus1[-1] - 1} WHERE chat_id={message.chat.id}")
             cursor.execute(f"UPDATE users SET scores={plus1[-1] + 1} WHERE random_number={message.text}")
+            cursor.execute(f"UPDATE users SET scores={minus1[-1] - 1} WHERE chat_id={message.chat.id}")
             # Replace 'message.text' with the actual value you want to use
             # random_number = message.text
             #
