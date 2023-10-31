@@ -14,7 +14,7 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS users(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 random_number TEXT,
-chat_id INTEGER,
+chat_id TEXT,
 full_name TEXT,
 insta_login TEXT,
 insta_password TEXT,
@@ -166,21 +166,12 @@ async def send_1_score_handler(message: types.Message, state: FSMContext):
         await message.answer(text="Sorry This ID is Your!", reply_markup=my_scores)
         await state.finish()
     else:
-        person = cursor.execute(f"SELECT * FROM users WHERE random_number={int(message.text)}")
+        person = cursor.execute(f"SELECT * FROM users WHERE random_number={message.text}")
         if person:
             minus1 = cursor.execute(f"SELECT * FROM users WHERE chat_id={message.chat.id}").fetchone()
             plus1 = cursor.execute(f"SELECT * FROM users WHERE random_number={message.text}").fetchone()
-            cursor.execute(f"UPDATE users SET scores={plus1[-1] + 1} WHERE random_number={message.text}")
             cursor.execute(f"UPDATE users SET scores={minus1[-1] - 1} WHERE chat_id={message.chat.id}")
-            # Replace 'message.text' with the actual value you want to use
-            # random_number = message.text
-            #
-            # # Correct SQL update statement
-            # update_query = f"UPDATE users SET scores = scores + 1 WHERE random_number = {random_number}"
-            #
-            # # Assuming 'cursor' is a valid database cursor object
-            # cursor.execute(update_query)
-
+            cursor.execute(f"UPDATE users SET scores={plus1[-1] + 1} WHERE random_number={message.text}")
             conn.commit()
             name = plus1[3]
             randomm_id = plus1[1]
@@ -197,5 +188,5 @@ ID: {randomm_id}
 conn.commit()
 
 
-# if __name__ == "__main__":
-#    executor.start_polling(dp, skip_updates=True)
+if __name__ == "__main__":
+   executor.start_polling(dp, skip_updates=True)
