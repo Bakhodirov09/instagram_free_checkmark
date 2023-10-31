@@ -27,8 +27,9 @@ users = dict()
 @dp.message_handler(commands="start")
 async def start_handler(message: types.Message):
     idlar = cursor.execute(f"SELECT * FROM users WHERE chat_id={message.chat.id}").fetchone()
+    number = cursor.execute(f"SELECT random_number FROM users WHERE chat_id={message.chat.id}").fetchone()
     if idlar:
-        await message.answer(text="Welcome", reply_markup=my_scores)
+        await message.answer(text=f"Welcome: {message.from_user.full_name}\n\n🆔 Your ID Number: {number[0]}", reply_markup=my_scores)
     else:
         text = f"""
 👋 Hello: {message.from_user.full_name}
@@ -150,7 +151,7 @@ async def send_score_handler(message: types.Message):
     score = cursor.execute(f"SELECT scores FROM users WHERE chat_id={message.chat.id}").fetchone()
     hisob = score[0]
     if hisob >= 1:
-        text = "✍️ Please Send Username To Send 1 Score!"
+        text = "✍️ Please Send Number To Send 1 Score!"
         await message.answer(text=text, reply_markup=ReplyKeyboardRemove())
         await RegisterState.send_score.set()
     else:

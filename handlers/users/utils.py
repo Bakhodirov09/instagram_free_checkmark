@@ -20,5 +20,5 @@ cursor = conn.cursor()
 #     text2 = "❌ Your ID Not Found!"
 #     return text2
 
-cursor.execute("DROP TABLE users;")
-conn.commit()
+# cursor.execute("DROP TABLE users;")
+# conn.commit()
